@@ -17,7 +17,7 @@ deploy:
     script: ./gradlew bintrayUpload
     skip_cleanup: true
     on:
-      repo: hmcts/ccd-case-migration-starter
+      repo: hmcts/nfdiv-ccd-case-migration
       tags: true
 env:
   global:

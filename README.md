@@ -1,4 +1,4 @@
-# ccd-case-migration-starter
+# nfdiv-ccd-case-migration
 
 CCD Case Migration Starter provides a framework for data migrations within CCD , to assist with case migrations that are required when the case definition changes in a way that requires existing cases to be updated to match the new case definition.
 
