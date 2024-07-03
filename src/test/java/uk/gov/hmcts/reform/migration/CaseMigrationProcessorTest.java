@@ -30,8 +30,8 @@ public class CaseMigrationProcessorTest {
 
     private static final String USER_TOKEN = "Bearer eeeejjjttt";
     private static final String EVENT_ID = "migrateCase";
-    private static final String EVENT_SUMMARY = "Migrate Case";
-    private static final String EVENT_DESCRIPTION = "Migrate Case";
+    private static final String EVENT_SUMMARY = "Data Migration - Setting organisation policy";
+    private static final String EVENT_DESCRIPTION = "Data Migration - Setting organisation policy";
     private static final String CASE_TYPE = "Test_Case_Type";
 
     @InjectMocks

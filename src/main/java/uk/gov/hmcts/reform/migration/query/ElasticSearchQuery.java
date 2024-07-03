@@ -8,18 +8,80 @@ public class ElasticSearchQuery {
     private static final String START_QUERY = """
         {
           "query": {
-            "match_all": {}
+            "bool": {
+              "must_not": [
+                {
+                  "terms": {
+                    "state.keyword": [
+                      "Draft",
+                      "AwaitingApplicant1Response",
+                      "AwaitingApplicant2Response",
+                      "Applicant2Approved",
+                      "AwaitingPayment",
+                      "AwaitingHWFDecision",
+                      "AwaitingDocuments",
+                      "Withdrawn",
+                      "Archived",
+                      "Rejected",
+                      "NewPaperCase",
+                      "FinalOrderComplete"
+                    ]
+                  }
+                }
+              ],
+              "should": [
+                {
+                  "bool": {
+                    "must_not": [
+                      { "exists": {
+                        "field": "data_classification.applicant1SolicitorOrganisationPolicy.value.Organisation"
+                      } }
+                    ]
+                  }
+                },
+                {
+                  "bool": {
+                    "must_not": [
+                      { "exists": {
+                        "field": "data_classification.applicant2SolicitorOrganisationPolicy.value.Organisation"
+                      } }
+                    ]
+                  }
+                },
+                {
+                  "bool": {
+                    "must_not": [
+                      { "match": {
+                        "data.applicant1SolicitorOrganisationPolicy.OrgPolicyCaseAssignedRole": "[APPONESOLICITOR]"
+                      } }
+                    ]
+                  }
+                },
+                {
+                  "bool": {
+                    "must_not": [
+                      { "match": {
+                        "data.applicant2SolicitorOrganisationPolicy.OrgPolicyCaseAssignedRole": "[APPTWOSOLICITOR]"
+                      } }
+                    ]
+                  }
+                }
+              ],
+              "minimum_should_match": 1
+            }
           },
           "_source": [
-            "reference"
+            "reference",
+            "state",
+            "data.applicant1SolicitorOrganisationPolicy",
+            "data.applicant2SolicitorOrganisationPolicy",
           ],
           "size": %s,
           "sort": [
             {
               "reference.keyword": "asc"
             }
-          ]
-          """;
+          ]""";
 
     private static final String END_QUERY = "\n}";
 

@@ -19,21 +19,84 @@ public class ElasticSearchQueryTest {
             .size(QUERY_SIZE)
             .build();
         String query = elasticSearchQuery.getQuery();
-        assertEquals("{\n"
-                         + "  \"query\": {\n"
-                         + "    \"match_all\": {}\n"
-                         + "  },\n"
-                         + "  \"_source\": [\n"
-                         + "    \"reference\"\n"
-                         + "  ],\n"
-                         + "  \"size\": 100,\n"
-                         + "  \"sort\": [\n"
-                         + "    {\n"
-                         + "      \"reference.keyword\": \"asc\"\n"
-                         + "    }\n"
-                         + "  ]\n"
-                         + "\n"
-                         + "}", query);
+        assertEquals("""
+        {
+          "query": {
+            "bool": {
+              "must_not": [
+                {
+                  "terms": {
+                    "state.keyword": [
+                      "Draft",
+                      "AwaitingApplicant1Response",
+                      "AwaitingApplicant2Response",
+                      "Applicant2Approved",
+                      "AwaitingPayment",
+                      "AwaitingHWFDecision",
+                      "AwaitingDocuments",
+                      "Withdrawn",
+                      "Archived",
+                      "Rejected",
+                      "NewPaperCase",
+                      "FinalOrderComplete"
+                    ]
+                  }
+                }
+              ],
+              "should": [
+                {
+                  "bool": {
+                    "must_not": [
+                      { "exists": {
+                        "field": "data_classification.applicant1SolicitorOrganisationPolicy.value.Organisation"
+                      } }
+                    ]
+                  }
+                },
+                {
+                  "bool": {
+                    "must_not": [
+                      { "exists": {
+                        "field": "data_classification.applicant2SolicitorOrganisationPolicy.value.Organisation"
+                      } }
+                    ]
+                  }
+                },
+                {
+                  "bool": {
+                    "must_not": [
+                      { "match": {
+                        "data.applicant1SolicitorOrganisationPolicy.OrgPolicyCaseAssignedRole": "[APPONESOLICITOR]"
+                      } }
+                    ]
+                  }
+                },
+                {
+                  "bool": {
+                    "must_not": [
+                      { "match": {
+                        "data.applicant2SolicitorOrganisationPolicy.OrgPolicyCaseAssignedRole": "[APPTWOSOLICITOR]"
+                      } }
+                    ]
+                  }
+                }
+              ],
+              "minimum_should_match": 1
+            }
+          },
+          "_source": [
+            "reference",
+            "state",
+            "data.applicant1SolicitorOrganisationPolicy",
+            "data.applicant2SolicitorOrganisationPolicy",
+          ],
+          "size": 100,
+          "sort": [
+            {
+              "reference.keyword": "asc"
+            }
+          ]
+        }   """, query);
     }
 
     @Test
@@ -44,20 +107,83 @@ public class ElasticSearchQueryTest {
             .searchAfterValue("1677777777")
             .build();
         String query = elasticSearchQuery.getQuery();
-        assertEquals("{\n"
-                         + "  \"query\": {\n"
-                         + "    \"match_all\": {}\n"
-                         + "  },\n"
-                         + "  \"_source\": [\n"
-                         + "    \"reference\"\n"
-                         + "  ],\n"
-                         + "  \"size\": 100,\n"
-                         + "  \"sort\": [\n"
-                         + "    {\n"
-                         + "      \"reference.keyword\": \"asc\"\n"
-                         + "    }\n"
-                         + "  ]\n"
-                         + ",\"search_after\": [1677777777]\n"
-                         + "}", query);
+        assertEquals("""
+        {
+          "query": {
+            "bool": {
+              "must_not": [
+                {
+                  "terms": {
+                    "state.keyword": [
+                      "Draft",
+                      "AwaitingApplicant1Response",
+                      "AwaitingApplicant2Response",
+                      "Applicant2Approved",
+                      "AwaitingPayment",
+                      "AwaitingHWFDecision",
+                      "AwaitingDocuments",
+                      "Withdrawn",
+                      "Archived",
+                      "Rejected",
+                      "NewPaperCase",
+                      "FinalOrderComplete"
+                    ]
+                  }
+                }
+              ],
+              "should": [
+                {
+                  "bool": {
+                    "must_not": [
+                      { "exists": {
+                        "field": "data_classification.applicant1SolicitorOrganisationPolicy.value.Organisation"
+                      } }
+                    ]
+                  }
+                },
+                {
+                  "bool": {
+                    "must_not": [
+                      { "exists": {
+                        "field": "data_classification.applicant2SolicitorOrganisationPolicy.value.Organisation"
+                      } }
+                    ]
+                  }
+                },
+                {
+                  "bool": {
+                    "must_not": [
+                      { "match": {
+                        "data.applicant1SolicitorOrganisationPolicy.OrgPolicyCaseAssignedRole": "[APPONESOLICITOR]"
+                      } }
+                    ]
+                  }
+                },
+                {
+                  "bool": {
+                    "must_not": [
+                      { "match": {
+                        "data.applicant2SolicitorOrganisationPolicy.OrgPolicyCaseAssignedRole": "[APPTWOSOLICITOR]"
+                      } }
+                    ]
+                  }
+                }
+              ],
+              "minimum_should_match": 1
+            }
+          },
+          "_source": [
+            "reference",
+            "state",
+            "data.applicant1SolicitorOrganisationPolicy",
+            "data.applicant2SolicitorOrganisationPolicy",
+          ],
+          "size": 100,
+          "sort": [
+            {
+              "reference.keyword": "asc"
+            }
+          ],"search_after": [1677777777]
+        }   """, query);
     }
 }

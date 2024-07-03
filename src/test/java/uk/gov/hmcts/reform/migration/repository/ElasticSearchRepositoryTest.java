@@ -29,37 +29,163 @@ public class ElasticSearchRepositoryTest {
 
     private static final String AUTH_TOKEN = "Test_Auth_Token";
 
-    private static final String INITIAL_QUERY = "{\n"
-        + "  \"query\": {\n"
-        + "    \"match_all\": {}\n"
-        + "  },\n"
-        + "  \"_source\": [\n"
-        + "    \"reference\"\n"
-        + "  ],\n"
-        + "  \"size\": 100,\n"
-        + "  \"sort\": [\n"
-        + "    {\n"
-        + "      \"reference.keyword\": \"asc\"\n"
-        + "    }\n"
-        + "  ]\n"
-        + "\n"
-        + "}";
+    private static final String INITIAL_QUERY = """
+    {
+      "query": {
+        "bool": {
+          "must_not": [
+            {
+              "terms": {
+                "state.keyword": [
+                  "Draft",
+                  "AwaitingApplicant1Response",
+                  "AwaitingApplicant2Response",
+                  "Applicant2Approved",
+                  "AwaitingPayment",
+                  "AwaitingHWFDecision",
+                  "AwaitingDocuments",
+                  "Withdrawn",
+                  "Archived",
+                  "Rejected",
+                  "NewPaperCase",
+                  "FinalOrderComplete"
+                ]
+              }
+            }
+          ],
+          "should": [
+            {
+              "bool": {
+                "must_not": [
+                  { "exists": {
+                    "field": "data_classification.applicant1SolicitorOrganisationPolicy.value.Organisation"
+                  } }
+                ]
+              }
+            },
+            {
+              "bool": {
+                "must_not": [
+                  { "exists": {
+                    "field": "data_classification.applicant2SolicitorOrganisationPolicy.value.Organisation"
+                  } }
+                ]
+              }
+            },
+            {
+              "bool": {
+                "must_not": [
+                  { "match": {
+                    "data.applicant1SolicitorOrganisationPolicy.OrgPolicyCaseAssignedRole": "[APPONESOLICITOR]"
+                  } }
+                ]
+              }
+            },
+            {
+              "bool": {
+                "must_not": [
+                  { "match": {
+                    "data.applicant2SolicitorOrganisationPolicy.OrgPolicyCaseAssignedRole": "[APPTWOSOLICITOR]"
+                  } }
+                ]
+              }
+            }
+          ],
+          "minimum_should_match": 1
+        }
+      },
+      "_source": [
+        "reference",
+        "state",
+        "data.applicant1SolicitorOrganisationPolicy",
+        "data.applicant2SolicitorOrganisationPolicy",
+      ],
+      "size": 100,
+      "sort": [
+        {
+          "reference.keyword": "asc"
+        }
+      ]
+    }   """;
 
-    private static final String SEARCH_AFTER_QUERY = "{\n"
-        + "  \"query\": {\n"
-        + "    \"match_all\": {}\n"
-        + "  },\n"
-        + "  \"_source\": [\n"
-        + "    \"reference\"\n"
-        + "  ],\n"
-        + "  \"size\": 100,\n"
-        + "  \"sort\": [\n"
-        + "    {\n"
-        + "      \"reference.keyword\": \"asc\"\n"
-        + "    }\n"
-        + "  ]\n"
-        + ",\"search_after\": [1677777777]\n"
-        + "}";
+    private static final String SEARCH_AFTER_QUERY = """
+    {
+      "query": {
+        "bool": {
+          "must_not": [
+            {
+              "terms": {
+                "state.keyword": [
+                  "Draft",
+                  "AwaitingApplicant1Response",
+                  "AwaitingApplicant2Response",
+                  "Applicant2Approved",
+                  "AwaitingPayment",
+                  "AwaitingHWFDecision",
+                  "AwaitingDocuments",
+                  "Withdrawn",
+                  "Archived",
+                  "Rejected",
+                  "NewPaperCase",
+                  "FinalOrderComplete"
+                ]
+              }
+            }
+          ],
+          "should": [
+            {
+              "bool": {
+                "must_not": [
+                  { "exists": {
+                    "field": "data_classification.applicant1SolicitorOrganisationPolicy.value.Organisation"
+                  } }
+                ]
+              }
+            },
+            {
+              "bool": {
+                "must_not": [
+                  { "exists": {
+                    "field": "data_classification.applicant2SolicitorOrganisationPolicy.value.Organisation"
+                  } }
+                ]
+              }
+            },
+            {
+              "bool": {
+                "must_not": [
+                  { "match": {
+                    "data.applicant1SolicitorOrganisationPolicy.OrgPolicyCaseAssignedRole": "[APPONESOLICITOR]"
+                  } }
+                ]
+              }
+            },
+            {
+              "bool": {
+                "must_not": [
+                  { "match": {
+                    "data.applicant2SolicitorOrganisationPolicy.OrgPolicyCaseAssignedRole": "[APPTWOSOLICITOR]"
+                  } }
+                ]
+              }
+            }
+          ],
+          "minimum_should_match": 1
+        }
+      },
+      "_source": [
+        "reference",
+        "state",
+        "data.applicant1SolicitorOrganisationPolicy",
+        "data.applicant2SolicitorOrganisationPolicy",
+      ],
+      "size": 100,
+      "sort": [
+        {
+          "reference.keyword": "asc"
+        }
+      ],"search_after": [1677777777]
+    }   """;
 
     private static final int QUERY_SIZE = 100;
     private static final int CASE_PROCESS_LIMIT = 100;
