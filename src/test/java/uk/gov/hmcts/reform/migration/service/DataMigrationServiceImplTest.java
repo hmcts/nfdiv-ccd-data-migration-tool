@@ -41,6 +41,16 @@ public class DataMigrationServiceImplTest {
             .build();
     }
 
+    private Map<String,Object> migrateDataWithOrgPolicies(
+        OrganisationPolicy<UserRole> app1OrgPolicy,
+        OrganisationPolicy<UserRole> app2OrgPolicy
+    ) {
+        Map<String, Object> inputData = new HashMap<>();
+        inputData.put(applicant1OrganisationPolicyKey, app1OrgPolicy);
+        inputData.put(applicant2OrganisationPolicyKey, app2OrgPolicy);
+        return service.migrate(inputData);
+    }
+
     @Test
     public void shouldReturnTrueForCaseDetailsPassed() {
         CaseDetails caseDetails = CaseDetails.builder()
@@ -71,15 +81,11 @@ public class DataMigrationServiceImplTest {
 
     @Test
     public void shouldPopulateDefaultOrgPoliciesWhenOrgPolicyIsFullyMissing() {
-        Map<String, Object> inputData = new HashMap<>();
-        Map<String, Object> expectedData = new HashMap<>();
+        Map<String, Object> expectedResult = new HashMap<>();
+        expectedResult.put(applicant1OrganisationPolicyKey, defaultApp1OrgPolicy);
+        expectedResult.put(applicant2OrganisationPolicyKey, defaultApp2OrgPolicy);
 
-        Map<String, Object> result = service.migrate(inputData);
-
-        expectedData.put(applicant1OrganisationPolicyKey, defaultApp1OrgPolicy);
-        expectedData.put(applicant2OrganisationPolicyKey, defaultApp2OrgPolicy);
-
-        assertEquals(expectedData, result);
+        assertEquals(expectedResult, migrateDataWithOrgPolicies(null, null));
     }
 
     @Test
@@ -92,17 +98,11 @@ public class DataMigrationServiceImplTest {
             .orgPolicyCaseAssignedRole(UserRole.APPLICANT_2_SOLICITOR)
             .build();
 
-        Map<String, Object> inputData = new HashMap<>();
-        inputData.put(applicant1OrganisationPolicyKey, app1OrgPolicy);
-        inputData.put(applicant2OrganisationPolicyKey, app2OrgPolicy);
+        Map<String, Object> expectedResult = new HashMap<>();
+        expectedResult.put(applicant1OrganisationPolicyKey, defaultApp1OrgPolicy);
+        expectedResult.put(applicant2OrganisationPolicyKey, defaultApp2OrgPolicy);
 
-        Map<String, Object> result = service.migrate(inputData);
-
-        Map<String, Object> expectedData = new HashMap<>();
-        expectedData.put(applicant1OrganisationPolicyKey, defaultApp1OrgPolicy);
-        expectedData.put(applicant2OrganisationPolicyKey, defaultApp2OrgPolicy);
-
-        assertEquals(expectedData, result);
+        assertEquals(expectedResult, migrateDataWithOrgPolicies(app1OrgPolicy, app2OrgPolicy));
     }
 
     @Test
@@ -115,21 +115,15 @@ public class DataMigrationServiceImplTest {
             .organisation(Organisation.builder().organisationId(null).organisationName(null).build())
             .build();
 
-        Map<String, Object> inputData = new HashMap<>();
-        inputData.put(applicant1OrganisationPolicyKey, app1OrgPolicy);
-        inputData.put(applicant2OrganisationPolicyKey, app2OrgPolicy);
+        Map<String, Object> expectedResult = new HashMap<>();
+        expectedResult.put(applicant1OrganisationPolicyKey, defaultApp1OrgPolicy);
+        expectedResult.put(applicant2OrganisationPolicyKey, defaultApp2OrgPolicy);
 
-        Map<String, Object> result = service.migrate(inputData);
-
-        Map<String, Object> expectedData = new HashMap<>();
-        expectedData.put(applicant1OrganisationPolicyKey, defaultApp1OrgPolicy);
-        expectedData.put(applicant2OrganisationPolicyKey, defaultApp2OrgPolicy);
-
-        assertEquals(expectedData, result);
+        assertEquals(expectedResult, migrateDataWithOrgPolicies(app1OrgPolicy, app2OrgPolicy));
     }
 
     @Test
-    public void shouldCorrectOrgPolicyCaseAssignedRolesWhenTheyAreReversed() {
+    public void shouldCorrectOrgPolicyCaseAssignedRoles() {
         OrganisationPolicy<UserRole> invalidApp1OrgPolicy = OrganisationPolicy.<UserRole>builder()
             .organisation(Organisation.builder().organisationId(null).organisationName(null).build())
             .orgPolicyCaseAssignedRole(UserRole.APPLICANT_2_SOLICITOR)
@@ -140,17 +134,11 @@ public class DataMigrationServiceImplTest {
             .orgPolicyCaseAssignedRole(UserRole.APPLICANT_1_SOLICITOR)
             .build();
 
-        Map<String, Object> inputData = new HashMap<>();
-        inputData.put(applicant1OrganisationPolicyKey, invalidApp1OrgPolicy);
-        inputData.put(applicant2OrganisationPolicyKey, invalidApp2OrgPolicy);
+        Map<String, Object> expectedResult = new HashMap<>();
+        expectedResult.put(applicant1OrganisationPolicyKey, defaultApp1OrgPolicy);
+        expectedResult.put(applicant2OrganisationPolicyKey, defaultApp2OrgPolicy);
 
-        Map<String, Object> result = service.migrate(inputData);
-
-        Map<String, Object> expectedData = new HashMap<>();
-        expectedData.put(applicant1OrganisationPolicyKey, defaultApp1OrgPolicy);
-        expectedData.put(applicant2OrganisationPolicyKey, defaultApp2OrgPolicy);
-
-        assertEquals(expectedData, result);
+        assertEquals(expectedResult, migrateDataWithOrgPolicies(invalidApp1OrgPolicy, invalidApp2OrgPolicy));
     }
 
     @Test
@@ -158,23 +146,19 @@ public class DataMigrationServiceImplTest {
         OrganisationPolicy<UserRole> app1OrgPolicy = OrganisationPolicy.<UserRole>builder()
             .organisation(Organisation.builder().organisationId("Test").organisationName("Test").build())
             .orgPolicyCaseAssignedRole(UserRole.APPLICANT_1_SOLICITOR)
+            .orgPolicyReference("TestReference")
             .build();
 
         OrganisationPolicy<UserRole> app2OrgPolicy = OrganisationPolicy.<UserRole>builder()
             .organisation(Organisation.builder().organisationId("Test2").organisationName("Test2").build())
             .orgPolicyCaseAssignedRole(UserRole.APPLICANT_2_SOLICITOR)
+            .orgPolicyReference("TestReference")
             .build();
 
-        Map<String, Object> inputData = new HashMap<>();
-        inputData.put(applicant1OrganisationPolicyKey, app1OrgPolicy);
-        inputData.put(applicant2OrganisationPolicyKey, app2OrgPolicy);
+        Map<String, Object> expectedResult = new HashMap<>();
+        expectedResult.put(applicant1OrganisationPolicyKey, app1OrgPolicy);
+        expectedResult.put(applicant2OrganisationPolicyKey, app2OrgPolicy);
 
-        Map<String, Object> result = service.migrate(inputData);
-
-        Map<String, Object> expectedData = new HashMap<>();
-        expectedData.put(applicant1OrganisationPolicyKey, app1OrgPolicy);
-        expectedData.put(applicant2OrganisationPolicyKey, app2OrgPolicy);
-
-        assertEquals(expectedData, result);
+        assertEquals(expectedResult, migrateDataWithOrgPolicies(app1OrgPolicy, app2OrgPolicy));
     }
 }
