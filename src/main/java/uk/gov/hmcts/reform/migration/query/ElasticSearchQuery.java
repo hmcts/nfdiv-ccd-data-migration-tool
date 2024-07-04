@@ -74,7 +74,7 @@ public class ElasticSearchQuery {
             "reference",
             "state",
             "data.applicant1SolicitorOrganisationPolicy",
-            "data.applicant2SolicitorOrganisationPolicy",
+            "data.applicant2SolicitorOrganisationPolicy"
           ],
           "size": %s,
           "sort": [
