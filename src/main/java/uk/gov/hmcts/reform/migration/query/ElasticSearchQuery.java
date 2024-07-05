@@ -32,20 +32,20 @@ public class ElasticSearchQuery {
               "should": [
                 {
                   "bool": {
-                    "must_not": [
+                    "must_not":
                       { "exists": {
                         "field": "data_classification.applicant1SolicitorOrganisationPolicy.value.Organisation"
-                      } }
-                    ]
+                      }
+                    }
                   }
                 },
                 {
                   "bool": {
-                    "must_not": [
+                    "must_not":
                       { "exists": {
                         "field": "data_classification.applicant2SolicitorOrganisationPolicy.value.Organisation"
-                      } }
-                    ]
+                      }
+                    }
                   }
                 },
                 {

@@ -46,20 +46,20 @@ public class ElasticSearchQueryTest {
               "should": [
                 {
                   "bool": {
-                    "must_not": [
+                    "must_not":
                       { "exists": {
                         "field": "data_classification.applicant1SolicitorOrganisationPolicy.value.Organisation"
-                      } }
-                    ]
+                      }
+                    }
                   }
                 },
                 {
                   "bool": {
-                    "must_not": [
+                    "must_not":
                       { "exists": {
                         "field": "data_classification.applicant2SolicitorOrganisationPolicy.value.Organisation"
-                      } }
-                    ]
+                      }
+                    }
                   }
                 },
                 {
@@ -88,7 +88,7 @@ public class ElasticSearchQueryTest {
             "reference",
             "state",
             "data.applicant1SolicitorOrganisationPolicy",
-            "data.applicant2SolicitorOrganisationPolicy",
+            "data.applicant2SolicitorOrganisationPolicy"
           ],
           "size": 100,
           "sort": [
@@ -134,20 +134,20 @@ public class ElasticSearchQueryTest {
               "should": [
                 {
                   "bool": {
-                    "must_not": [
+                    "must_not":
                       { "exists": {
                         "field": "data_classification.applicant1SolicitorOrganisationPolicy.value.Organisation"
-                      } }
-                    ]
+                      }
+                    }
                   }
                 },
                 {
                   "bool": {
-                    "must_not": [
+                    "must_not":
                       { "exists": {
                         "field": "data_classification.applicant2SolicitorOrganisationPolicy.value.Organisation"
-                      } }
-                    ]
+                      }
+                    }
                   }
                 },
                 {
@@ -176,7 +176,7 @@ public class ElasticSearchQueryTest {
             "reference",
             "state",
             "data.applicant1SolicitorOrganisationPolicy",
-            "data.applicant2SolicitorOrganisationPolicy",
+            "data.applicant2SolicitorOrganisationPolicy"
           ],
           "size": 100,
           "sort": [

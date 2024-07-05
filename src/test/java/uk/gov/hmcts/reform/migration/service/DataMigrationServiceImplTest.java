@@ -3,7 +3,9 @@ package uk.gov.hmcts.reform.migration.service;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.junit4.SpringRunner;
 import uk.gov.hmcts.ccd.sdk.type.Organisation;
 import uk.gov.hmcts.ccd.sdk.type.OrganisationPolicy;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
@@ -18,15 +20,19 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
-@RunWith(MockitoJUnitRunner.class)
+//@ExtendWith(SpringExtension.class)
+//@SpringBootTest
+@RunWith(SpringRunner.class)
+@SpringBootTest
 public class DataMigrationServiceImplTest {
 
     private final String applicant1OrganisationPolicyKey = "applicant1SolicitorOrganisationPolicy";
     private final String applicant2OrganisationPolicyKey = "applicant2SolicitorOrganisationPolicy";
-
-    private DataMigrationServiceImpl service = new DataMigrationServiceImpl();
     private OrganisationPolicy defaultApp1OrgPolicy;
     private OrganisationPolicy defaultApp2OrgPolicy;
+
+    @Autowired
+    DataMigrationServiceImpl service;
 
     @Before
     public void setUp() {

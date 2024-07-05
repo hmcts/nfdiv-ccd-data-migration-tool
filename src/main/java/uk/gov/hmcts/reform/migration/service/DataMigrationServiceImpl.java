@@ -1,5 +1,7 @@
 package uk.gov.hmcts.reform.migration.service;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.ccd.sdk.type.Organisation;
 import uk.gov.hmcts.ccd.sdk.type.OrganisationPolicy;
@@ -15,6 +17,12 @@ public class DataMigrationServiceImpl implements DataMigrationService<Map<String
 
     private final String applicant1OrganisationPolicyKey = "applicant1SolicitorOrganisationPolicy";
     private final String applicant2OrganisationPolicyKey = "applicant2SolicitorOrganisationPolicy";
+    private final ObjectMapper objectMapper;
+
+    @Autowired
+    public DataMigrationServiceImpl(ObjectMapper objectMapper) {
+        this.objectMapper = objectMapper;
+    }
 
     @Override
     public Predicate<CaseDetails> accepts() {
@@ -27,22 +35,28 @@ public class DataMigrationServiceImpl implements DataMigrationService<Map<String
             return null;
         }
 
-        OrganisationPolicy<UserRole> app1OrgPolicy = initializeOrgPolicy(caseData, applicant1OrganisationPolicyKey);
-        OrganisationPolicy<UserRole> app2OrgPolicy = initializeOrgPolicy(caseData, applicant2OrganisationPolicyKey);
-
-        setDefaultOrgPolicyFields(app1OrgPolicy, UserRole.APPLICANT_1_SOLICITOR);
-        setDefaultOrgPolicyFields(app2OrgPolicy, UserRole.APPLICANT_2_SOLICITOR);
-
-        caseData.put(applicant1OrganisationPolicyKey, app1OrgPolicy);
-        caseData.put(applicant2OrganisationPolicyKey, app2OrgPolicy);
+        setOrgPolicy(caseData, applicant1OrganisationPolicyKey, UserRole.APPLICANT_1_SOLICITOR);
+        setOrgPolicy(caseData, applicant2OrganisationPolicyKey, UserRole.APPLICANT_2_SOLICITOR);
 
         return caseData;
     }
 
+    private void setOrgPolicy(Map<String, Object> caseData, String orgPolicyKey, UserRole solRole) {
+        OrganisationPolicy<UserRole> orgPolicy = getOrInitializeOrgPolicy(caseData, orgPolicyKey);
+
+        if (orgPolicy.getOrganisation() != null && orgPolicy.getOrgPolicyCaseAssignedRole() == solRole) {
+            return;
+        }
+
+        setDefaultOrgPolicyFields(orgPolicy, solRole);
+
+        caseData.put(orgPolicyKey, orgPolicy);
+    }
+
     @SuppressWarnings("unchecked")
-    private OrganisationPolicy<UserRole> initializeOrgPolicy(Map<String, Object> data, String orgPolicyKey) {
-        return (OrganisationPolicy<UserRole>) Optional.ofNullable(data.get(orgPolicyKey))
-            .orElseGet(OrganisationPolicy::new);
+    private OrganisationPolicy<UserRole> getOrInitializeOrgPolicy(Map<String, Object> data, String orgPolicyKey) {
+        return objectMapper.convertValue(Optional.ofNullable(data.get(orgPolicyKey))
+            .orElseGet(OrganisationPolicy::new), OrganisationPolicy.class);
     }
 
     private void setDefaultOrgPolicyFields(OrganisationPolicy<UserRole> organisationPolicy, UserRole solicitorRole) {
