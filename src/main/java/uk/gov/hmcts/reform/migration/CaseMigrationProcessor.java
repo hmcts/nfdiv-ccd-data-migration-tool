@@ -21,8 +21,8 @@ import java.util.Map;
 @Component
 public class CaseMigrationProcessor {
     private static final String EVENT_ID = "system-migrate-organisation-policies";
-    private static final String EVENT_SUMMARY = "Data Migration - Setting organisation policy";
-    private static final String EVENT_DESCRIPTION = "Data Migration - Setting organisation policy";
+    private static final String EVENT_SUMMARY = "Data Migration - Set default organisation policies for NoC";
+    private static final String EVENT_DESCRIPTION = "Data Migration - Set default organisation policies for NoC";
     public static final String LOG_STRING = "-----------------------------------------";
 
     @Autowired
