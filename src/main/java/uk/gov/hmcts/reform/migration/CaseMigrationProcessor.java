@@ -20,9 +20,9 @@ import java.util.Map;
 @Slf4j
 @Component
 public class CaseMigrationProcessor {
-    private static final String EVENT_ID = "migrateCase";
-    private static final String EVENT_SUMMARY = "Migrate Case";
-    private static final String EVENT_DESCRIPTION = "Migrate Case";
+    private static final String EVENT_ID = "system-migrate-organisation-policies";
+    private static final String EVENT_SUMMARY = "Data Migration - Set default organisation policies for NoC";
+    private static final String EVENT_DESCRIPTION = "Data Migration - Set default organisation policies for NoC";
     public static final String LOG_STRING = "-----------------------------------------";
 
     @Autowired
