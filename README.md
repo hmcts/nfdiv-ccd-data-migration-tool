@@ -25,12 +25,12 @@ To set up a new migration, define an elastic search query to retrieve the cases 
 
 The migrations are recorded in case history by a new case event. The name and description of this event can be configured in [CaseMigrationProcessor.java](https://github.com/hmcts/nfdiv-ccd-case-migration/blob/master/src/main/java/uk/gov/hmcts/reform/migration/CaseMigrationProcessor.java).
 
-During the migration, CCD makes a call to nfdiv-case-api and you will also need to add a blank event to case-api for your migration to work [example PR](https://github.com/hmcts/nfdiv-case-api/pull/3841)
+During the migration, CCD makes a call to nfdiv-case-api and you will also need to add a blank event to the api for your migration to work ([example PR](https://github.com/hmcts/nfdiv-case-api/pull/3841)).
 
 After merging the migration into master, it is run like a cron, using the flux configuration defined in the [cnp-flux-config](https://github.com/hmcts/cnp-flux-config/tree/master/apps/nfdiv/nfdiv-ccd-case-migration) repo.
 
 ## Testing the Elastic Search query in local dev
-If you have set up a project locally that includes CCD (e.g. nfdiv-case-api), you should find that entries in your local DB are automatically indexed by elastic search and made available through a Docker container (e.g. `ccd-elasticsearch-1`). By sending a get request to this container, you can test the ES query:
+If you have set up a project locally that includes CCD (e.g. nfdiv-case-api), you should find that entries in your local DB are automatically indexed by elastic search and made available through a Docker container. By sending a get request to the container, you can test the ES query:
 
 Example request structure:
 ```bash
@@ -76,11 +76,11 @@ curl -X GET "localhost:9200/nfd_cases-000001/_search?pretty" -H 'Content-Type: a
 ```
 
 ## Testing the entire migration job in local dev
-You can also test the full migration job in AAT from your local development environment, without using flux:
+You can also test the full migration job in AAT from your local development environment:
 
 1.) Run bootJar to create a Jar file.
 
-2.) Trigger the migration using the name of your Jar and nfdiv secrets.
+2.) Trigger the migration using the name of the Jar and nfdiv secrets from KeyVaults.
 
 ```bash
 java -jar \
@@ -105,7 +105,7 @@ java -jar \
     -Dfeign.client.config.default.readTimeout="60000" \
     PATH/TO_MIGRATION.jar
 ```
-The case type would be NFD to run it for normal AAT cases, but you could also use your own custom case type for test cases that you have set up in preview, e.g. `NFD-3000`.
+The case type would be NFD to migrate standard AAT cases. However, you could choose to use your own custom casetype for testing (e.g. `NFD-3000`), as this removes the risk of running the migration for other peoples test cases by mistake.
 
 ## Unit tests
 
