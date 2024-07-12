@@ -29,8 +29,54 @@ During the migration, CCD makes a call to nfdiv-case-api and you will also need 
 
 After merging the migration into master, it is run like a cron, using the flux configuration defined in the [cnp-flux-config](https://github.com/hmcts/cnp-flux-config/tree/master/apps/nfdiv/nfdiv-ccd-case-migration) repo.
 
-## Testing a migration from local dev
-You can test the migration in AAT without using flux:
+## Testing the Elastic Search query in local dev
+If you have set up a project locally that includes CCD (e.g. nfdiv-case-api), you should find that entries in your local DB are automatically indexed by elastic search and made available through a Docker container (e.g. `ccd-elasticsearch-1`). By sending a get request to this container, you can test the ES query:
+
+Example request structure:
+```bash
+curl -X GET "localhost:9200/nfd_cases-000001/_search?pretty" -H 'Content-Type: application/json' -d 'query'
+```
+
+Example request with a query included:
+```bash
+curl -X GET "localhost:9200/nfd_cases-000001/_search?pretty" -H 'Content-Type: application/json' -d '{
+  "query": {
+    "bool": {
+      "must_not": [
+        {
+          "terms": {
+            "data.state": ["Draft"]
+          }
+        }
+      ],
+      "should": [
+        {
+            "bool": {
+            "must_not":
+                { "exists": {
+                "field": "data_classification.applicant1SolicitorOrganisationPolicy.value.Organisation"
+                }
+            }
+            }
+        }
+      ]
+    }
+  },
+  "_source": [
+    "reference",
+    "state"
+  ],
+  "size": 100,
+  "sort": [
+    {
+      "reference.keyword": "asc"
+    }
+  ]
+}'
+```
+
+## Testing the entire migration job in local dev
+You can also test the full migration job in AAT from your local development environment, without using flux:
 
 1.) Run bootJar to create a Jar file.
 
