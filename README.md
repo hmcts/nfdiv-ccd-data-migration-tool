@@ -1,80 +1,65 @@
 # nfdiv-ccd-case-migration
 
-CCD Case Migration Starter provides a framework for data migrations within CCD , to assist with case migrations that are required when the case definition changes in a way that requires existing cases to be updated to match the new case definition.
-
-The framework runs the following process :-
+This is a No-Fault Divorce clone of the CCD Case Migration Starter, which provides a framework for data migrations within CCD. The framework runs the following process:
 
 ![diagram](docs/process.png)
 
-The source code is maintained as a template within GitHub and is typically either cloned by a service team to establish a migration capability , or branched within the repository.
 
 CCD Case Migration Starter framework source code is located in HMCTS GitHub repository  https://github.com/hmcts/ccd-case-migration-starter
 
-It is built by Jenkins using HMCTS Jenkins job  https://build.platform.hmcts.net/job/HMCTS_a_to_c/job/ccd-case-migration-starter/
 
 ## Getting started
 
-To utilise the CCD Case Migration Starter :-
 
 1. Clone the GitHub repository and create a branch for the migration task.
 
-2. Make the required source code changes for the migration task (see section below).
+2. Make the required source code changes for the migration task (see section below) and create a pull request.
 
-3. Create a pull request.
+4. Merge into master.
 
-4. Request PlatOps to copy the JAR that was built using the pipeline from the repository to the bastion server for operation.
+5. Parameterise the migration job in the cnp-flux-config repo (including job timing, batch size, case reference etc).
 
-## Required source code changes
+## Code changes for a new migration
 
-As a minimum , the source code changes described below should be made.
+To set up a new migration, define an elastic search query to retrieve the cases that should be migrated in [ElasticSearchQuery.java](https://github.com/hmcts/nfdiv-ccd-case-migration/blob/master/src/main/java/uk/gov/hmcts/reform/migration/query/ElasticSearchQuery.java) and add the business logic for the migration in [DataMigrationServiceImpl.java](https://github.com/hmcts/nfdiv-ccd-case-migration/blob/master/src/main/java/uk/gov/hmcts/reform/migration/service/DataMigrationServiceImpl.java).
 
-Create a Java class which implements `uk.gov.hmcts.reform.migration.service.DataMigrationService` interface in similar way as shown below :-
+The migrations are recorded in case history by a new case event. The name and description of this event can be configured in [CaseMigrationProcessor.java](https://github.com/hmcts/nfdiv-ccd-case-migration/blob/master/src/main/java/uk/gov/hmcts/reform/migration/CaseMigrationProcessor.java).
 
-```java
-package uk.gov.hmcts.reform.migration.service;
+During the migration, CCD makes a call to nfdiv-case-api and you will also need to add a blank event to case-api for your migration to work [example PR](https://github.com/hmcts/nfdiv-case-api/pull/3841)
 
-import org.springframework.stereotype.Component;
-import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+After merging the migration into master, it is run like a cron, using the flux configuration defined in the [cnp-flux-config](https://github.com/hmcts/cnp-flux-config/tree/master/apps/nfdiv/nfdiv-ccd-case-migration) repo.
 
-import java.util.function.Predicate;
+## Testing a migration from local dev
+You can test the migration in AAT without using flux:
 
-@Component
-public class DataMigrationServiceImpl implements DataMigrationService {
-    @Override
-    public Predicate<CaseDetails> accepts() {
-        return true; // Predicate that allows to narrow number of cases that gets migrated
-    }
+1.) Run bootJar to create a Jar file.
 
-    @Override
-    public void migrate(CaseDetails caseDetails) {
-        // Case data migration logic goes here
-    }
-}
+2.) Trigger the migration using the name of your Jar and nfdiv secrets.
+
+```bash
+java -jar \
+    -Dspring.application.name="nfdiv-ccd-case-migration" \
+    -Didam.api.url="https://idam-api.aat.platform.hmcts.net" \
+    -Didam.client.id="[SECRET_FROM_VAULT]" \
+    -Didam.client.secret="[SECRET_FROM_VAULT]" \
+    -Didam.client.redirect_uri="https://nfdiv.aat.platform.hmcts.net/oauth2/callback" \
+    -Dcore_case_data.api.url="http://ccd-data-store-api-aat.service.core-compute-aat.internal" \
+    -Didam.s2s-auth.url="http://rpe-service-auth-provider-aat.service.core-compute-aat.internal" \
+    -Didam.s2s-auth.microservice="nfdiv_case_api" \
+    -Didam.s2s-auth.totp_secret="[SECRET_FROM_VAULT]" \
+    -Dmigration.idam.username="[SECRET_FROM_VAULT]" \
+    -Dmigration.idam.password="[SECRET_FROM_VAULT]" \
+    -Dmigration.jurisdiction="DIVORCE" \
+    -Dmigration.caseType="NFD" \
+    -Dcase-migration.elasticsearch.querySize="100" \
+    -Dcase-migration.enabled=true \
+    -Dlogging.level.root="ERROR" \
+    -Dlogging.level.uk.gov.hmcts.reform="INFO" \
+    -Dfeign.client.config.default.connectTimeout="60000" \
+    -Dfeign.client.config.default.readTimeout="60000" \
+    PATH/TO_MIGRATION.jar
 ```
-
-Ensure that the application properties below are configured as required in `application.properties` file :-
-
-```properties
-idam.api.url= # IDAM API URL used to authenticate system update user (pointing to localhost version of IDAM API by default)
-idam.client.id= # IDAM OAuth2 client ID used to authenticate system update user
-idam.client.secret= # IDAM OAuth2 client secret used to authenticate system update user
-idam.client.redirect_uri= # IDAM OAuth2 redirect URL used to authenticate system update user
-
-idam.s2s-auth.url= # S2S API URL used to authenticate service (pointing to localhost version of S2S API by default)
-idam.s2s-auth.microservice= # S2S micro service name used to authenticate service
-idam.s2s-auth.totp_secret= # S2S micro service secret used to authenticate service
-
-core_case_data.api.url= # CCD data store API URL used to fetch / update case details (pointing to localhost version of CCD by default)
-
-migration.idam.username= # IDAM username of a system update user that performs data migration
-migration.idam.password= # IDAM password of a system update user that performs data migration
-migration.jurisdiction= # CCD jurisdiction that data migration is run against
-migration.casetype= # CCD case type that data migration is run against
-migration.caseId= # optional CCD case ID in case only one case needs to be migrated
-
-case-migration.elasticsearch.querySize= # Elasticsearch query size limit
-case-migration.processing.limit= # Migration processing size limit
-```
+The case type would be NFD to run it for normal AAT cases, but you could also use your own custom case type for test cases that you have set up in preview, e.g. `NFD-3000`.
 
 ## Unit tests
 
