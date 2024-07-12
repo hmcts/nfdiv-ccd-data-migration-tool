@@ -1,7 +1,4 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
-  "extends": ["local>hmcts/.github:renovate-config"],
-  "labels": [
-    "Renovate-dependencies"
-  ]
+  "extends": ["github>hmcts/.github//renovate/automerge-all", "local>hmcts/.github:renovate-config"]
 }
