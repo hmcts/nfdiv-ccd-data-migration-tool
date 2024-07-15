@@ -188,7 +188,7 @@ dependencies {
   implementation group: 'com.github.hmcts', name: 'service-auth-provider-java-client', version: '3.1.4'
   implementation group: 'com.github.hmcts', name: 'core-case-data-store-client', version: '4.9.2'
   implementation 'org.apache.tomcat.embed:tomcat-embed-websocket:8.5.100'
-  implementation 'org.apache.tomcat.embed:tomcat-embed-core:10.1.25'
+  implementation 'org.apache.tomcat.embed:tomcat-embed-core:10.1.26'
 
   testImplementation group: 'org.springframework.boot', name: 'spring-boot-starter-test'
   testImplementation group: 'com.github.tomakehurst', name: 'wiremock', version: '2.33.2'
