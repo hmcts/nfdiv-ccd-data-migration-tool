@@ -19,7 +19,6 @@ public class ElasticSearchQuery {
                       "Applicant2Approved",
                       "AwaitingPayment",
                       "AwaitingHWFDecision",
-                      "AwaitingDocuments",
                       "Withdrawn",
                       "Archived",
                       "Rejected",
